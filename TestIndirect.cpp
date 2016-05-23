@@ -609,7 +609,7 @@ TEST_CASE("emplace","[indirect.emplace]")
     WHEN("emplace is called")
     {
       int v = 7;
-      cptr.emplace<DerivedType>(v);
+      cptr.emplace(v);
 
       CHECK(DerivedType::object_count == 1);
 
@@ -631,7 +631,7 @@ TEST_CASE("emplace","[indirect.emplace]")
     WHEN("emplace is called")
     {
       int v2 = 7;
-      cptr.emplace<DerivedType>(v2);
+      cptr.emplace(v2);
       CHECK(DerivedType::object_count == 1);
 
       THEN("The indirect is non-empty and owns the pointer")

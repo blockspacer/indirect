@@ -270,11 +270,11 @@ public:
   // Modifiers
   //
 
-  template <typename U, typename... Ts>
+  template <typename... Ts>
   void emplace(Ts&&... ts)
   {
-    auto p = std::make_unique<direct_control_block<T, U>>(
-        std::forward<Ts>(ts)...);
+    auto p =
+        std::make_unique<direct_control_block<T, T>>(std::forward<Ts>(ts)...);
     ptr_ = p->ptr();
     cb_ = std::move(p);
   }
