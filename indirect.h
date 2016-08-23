@@ -3,12 +3,13 @@
 #include <type_traits>
 
 ////////////////////////////////////////////////////////////////////////////////
-// Implementation detail classes 
+// Implementation detail classes
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
 struct default_copier
 {
+  static_assert(std::is_copy_constructible<T>::value, "");
   T* operator()(const T& t) const
   {
     return new T(t);
@@ -48,7 +49,8 @@ public:
   std::unique_ptr<control_block<T>> clone() const override
   {
     assert(p_);
-    return std::make_unique<pointer_control_block>(c_(*p_), c_, p_.get_deleter());
+    return std::make_unique<pointer_control_block>(c_(*p_), c_,
+                                                   p_.get_deleter());
   }
 
   T* ptr() override
@@ -64,8 +66,7 @@ class direct_control_block : public control_block<U>
 
 public:
   template <typename... Ts>
-  explicit direct_control_block(Ts&&... ts)
-      : u_(U(std::forward<Ts>(ts)...))
+  explicit direct_control_block(Ts&&... ts) : u_(U(std::forward<Ts>(ts)...))
   {
   }
 
@@ -110,9 +111,9 @@ public:
 template <typename T>
 class indirect
 {
-
   template <typename U>
   friend class indirect;
+
   template <typename T_, typename... Ts>
   friend indirect<T_> make_indirect(Ts&&... ts);
 
@@ -130,8 +131,10 @@ public:
   // Constructors
   //
 
-  indirect() {}
-  
+  indirect()
+  {
+  }
+
   ~indirect() = default;
 
   template <typename U, typename C = default_copier<U>,
@@ -146,8 +149,8 @@ public:
 
     assert(typeid(*u) == typeid(U));
 
-    cb_ = std::make_unique<pointer_control_block<T, U, C, D>>(u, std::move(copier),
-                                                           std::move(deleter));
+    cb_ = std::make_unique<pointer_control_block<T, U, C, D>>(
+        u, std::move(copier), std::move(deleter));
     ptr_ = u;
   }
 
@@ -259,16 +262,16 @@ public:
     return *this;
   }
 
+  //
+  // Modifiers
+  //
+
   void swap(indirect& p) noexcept
   {
     using std::swap;
     swap(ptr_, p.ptr_);
     swap(cb_, p.cb_);
   }
-
-  //
-  // Modifiers
-  //
 
   template <typename... Ts>
   void emplace(Ts&&... ts)
@@ -332,14 +335,13 @@ public:
 };
 
 //
-// indirect creation
+// factory function
 //
 template <typename T, typename... Ts>
 indirect<T> make_indirect(Ts&&... ts)
 {
   indirect<T> p;
-  p.cb_ =
-      std::make_unique<direct_control_block<T>>(std::forward<Ts>(ts)...);
+  p.cb_ = std::make_unique<direct_control_block<T>>(std::forward<Ts>(ts)...);
   p.ptr_ = p.cb_->ptr();
   return std::move(p);
 }
@@ -348,7 +350,7 @@ indirect<T> make_indirect(Ts&&... ts)
 //
 // non-member swap
 //
-template<typename T>
+template <typename T>
 void swap(indirect<T>& t, indirect<T>& u) noexcept
 {
   t.swap(u);
