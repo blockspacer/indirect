@@ -5,7 +5,7 @@ project(indirect)
 set(CMAKE_CXX_FLAGS "-std=c++14")
 
 include_directories(externals/catch/include)
-add_executable(TestIndirect TestIndirect.cpp)
+add_executable(TestIndirect test.cpp test_indirect.cpp)
 
 enable_testing()
 add_test(
