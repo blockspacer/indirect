@@ -146,13 +146,13 @@ public:
         return *this;
     }
 
-    template <typename U, std::enable_if_t<std::is_base_of<T, U>::value, int> = 0>
+    template <typename U, std::enable_if_t<std::is_base_of<T, std::remove_reference_t<U>>::value, int> = 0>
     indirect(U&& other) :
         m(std::make_unique<detail::dcb_t<U>>(std::forward<U>(other)))
     {
     }
 
-    template <typename U, std::enable_if_t<std::is_base_of<T, U>::value, int> = 0>
+    template <typename U, std::enable_if_t<std::is_base_of<T, std::remove_reference_t<U>>::value, int> = 0>
     indirect& operator=(U&& other)
     {
         m = std::make_unique<detail::dcb_t<U>>(std::forward<U>(other));
@@ -241,14 +241,14 @@ template <typename T, typename U>
 indirect<T> dynamic_indirect_cast(indirect<U> const& i)
 {
     i.try_dynamic_cast<T>();
-    return static_indirect_cast<T>(i);
+    return indirect<T>(i.m.cb->copy());
 }
 
 template <typename T, typename U>
 indirect<T> dynamic_indirect_cast(indirect<U>&& i)
 {
     i.try_dynamic_cast<T>();
-    return static_indirect_cast<T>(std::move(i));
+    return indirect<T>(i.m.cb->move());
 }
 
 template <typename T>

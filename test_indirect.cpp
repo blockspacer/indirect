@@ -227,24 +227,27 @@ SCENARIO("`indirect` can be move assigned", "[assign][move]")
     }
 }
 
-//SCENARIO("`indirect` can be constructed from values of type `T`", "[construct][copy]")
-//{
-    //GIVEN("an `indirect<derived>` constructed from a `derived const&`")
-    //{
-        //derived d{42};
-        //indirect<derived> id{};
+SCENARIO("`indirect` can be constructed from values of type `T`", "[construct][copy]")
+{
+    GIVEN("an `indirect<derived>` constructed from a `derived const&`")
+    {
+        derived d1{42};
+        indirect<derived> d2 = d1;
 
-        //REQUIRE(derived::object_count == 1);
-        //REQUIRE(d->get_value() == 42);
+        REQUIRE(derived::object_count == 2);
+        REQUIRE(d1.get_value() == 42);
+        REQUIRE(d2->get_value() == 42);
 
-        //WHEN("it is assigned from another `derived`")
-        //{
-            //d = derived{};
+        WHEN("it is assigned from another `derived`")
+        {
+            d2 = derived{};
 
-            //REQUIRE(derived::object_count == 1);
-            //REQUIRE(d->get_value() == 0);
-        //}
-    //}
+            REQUIRE(derived::object_count == 2);
+            REQUIRE(d1.get_value() == 42);
+            REQUIRE(d2->get_value() == 0);
+        }
+    }
+}
 
     //GIVEN("an `indirect<base>` constructed from a `derived`")
     //{
